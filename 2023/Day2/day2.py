@@ -1,4 +1,5 @@
 from re import findall
+from functools import reduce
 
 
 REDS = 12
@@ -34,4 +35,9 @@ def read_input_part2(filename: str):
             total += max_red * max_green * max_blue
     return total
 
+def read_input_part2_oneliner(filename: str):
+    with open(filename, 'r') as f:
+        return sum([reduce(lambda x,y: x*y, [max(map(int, findall(r'(\d+) ' + color, l))) for color in ('red', 'green', 'blue')]) for l in f.readlines()])
+
 print(read_input_part2(FILE))
+print(read_input_part2_oneliner(FILE))
