@@ -29,7 +29,6 @@ print(calculate_points(cards))
 card_units = [1 for _ in cards]
 for i,c in enumerate(cards):
     winning_numbers = len(set(c[0]).intersection(c[1]))
-    print(winning_numbers)
     for j in range(winning_numbers):
         card_units[i+j+1] += card_units[i]
 print(sum(card_units))
