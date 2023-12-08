@@ -1,6 +1,7 @@
 from re import findall
 from typing import List, Tuple
 from functools import reduce
+from math import sqrt, ceil, floor
 
 
 def read_input(filename: str) -> Tuple[List[int]]:
@@ -25,5 +26,21 @@ print(result)
 
 time = int(''.join(map(str, times)))
 distance = int(''.join(map(str, distances)))
-print(find_ways_to_win(time, distance))
-# TODO Could be optimized using the quadratic ecuation
+# print(find_ways_to_win(time, distance))
+
+
+# Quadratic Equation optimization
+
+# Valid solutions are in the range ceil(r1)-floor(r2)
+# where r1,r2 are the solutions of   distance = hold * (time - hold)
+# which is equivalent to - (hold^2) + time*hold - distance = 0
+
+def ways_to_win_quadratic_eq(time, distance) -> int:
+    a = -1
+    b = time
+    c = -distance
+    r1 = (- b + sqrt(b**2 - 4 * a * c)) / (2 * a)
+    r2 = (- b - sqrt(b**2 - 4 * a * c)) / (2 * a)
+    return floor(max(r1,r2)) - ceil(min(r1,r2)) + 1
+
+print(ways_to_win_quadratic_eq(time, distance))
