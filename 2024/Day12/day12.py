@@ -1,6 +1,27 @@
 from pprint import pprint
-from typing import List
+from typing import List, Dict
 
+
+OPPOSITE_DIR = { '>': '<', '<': '>', '^': 'v', 'v': '^' }
+
+class Move:
+    def __init__(self, str_x, str_y, turn_x, turn_y, dir_turn, dir_opposite):
+        self.straight = slice(str_x, str_y)
+        self.turn1 = slice(turn_x, turn_y)
+        self.dir_turn1 = dir_turn
+        self.turn2 = slice(-turn_x, -turn_y)
+        self.dir_turn2 = OPPOSITE_DIR[dir_turn]
+        self.dir_opposite = dir_opposite
+
+    def __repr__(self):
+        return MOVES_PER_DIR[self.dir_opposite].dir_opposite
+
+MOVES_PER_DIR: Dict[str, Move] = {
+    '>': Move( 0,  1, -1,  0, '^', '<'),
+    '<': Move( 0, -1,  1,  0, 'v', '>'),
+    'v': Move( 1,  0,  0,  1, '>', '^'),
+    '^': Move(-1,  0,  0, -1, '<', 'v')
+}
 
 class Node:
     def __init__(self, value, i, j):
@@ -23,6 +44,23 @@ class Node:
             if self.value == neighbour.value and not neighbour.region:
                 neighbour.define_region(region)
 
+    def next_neighbour(self, direction: str):
+        move = MOVES_PER_DIR[direction]
+        if (n := self[move.turn1]) and self.value == n.value:
+            return n, move.dir_turn1, 1
+        if (n := self[move.straight]) and self.value == n.value:
+            return n, direction, 0
+        if (n := self[move.turn2]) and self.value == n.value:
+            return n, move.dir_turn2, 1
+        return self, move.dir_opposite, 2
+
+    def __getitem__(self, item):
+        assert isinstance(item, slice)
+        for n in self.neighbours:
+            if n.i == self.i + item.start and n.j == self.j + item.stop:
+                return n
+        return None
+
     @property
     def area(self):
         return 1
@@ -33,7 +71,8 @@ class Node:
 
     def __str__(self):
         # return f'[{self.value}] - ' + '|'.join([n.value for n in self.neighbours])
-        return str(self.region)[-1]
+        # return str(self.region)[-1]
+        return f'({self.i},{self.j})'
 
     def __repr__(self):
         return str(self)
@@ -74,5 +113,28 @@ print(total)
 
 # Part 2
 
+def count_sides(nodes: List[Node]) -> int:
+    if len(nodes) in (1, 2):
+        return 4
+
+    curr = start = nodes[0]
+    curr_dir = '>'
+    sides = 1
+
+    while True:
+        curr, curr_dir, sides_added = curr.next_neighbour(curr_dir)
+        sides += sides_added
+        if curr == start:
+            if curr_dir == '<':
+                sides += 1
+            break
+    return sides
 
 
+total = 0
+for region, region_nodes in regions.items():
+    total_area = sum(node.area for node in region_nodes)
+    num_sides = count_sides(region_nodes)
+    # print('Checking region:', region, '->', num_sides, 'sides')
+    total += total_area * num_sides
+print(total)
