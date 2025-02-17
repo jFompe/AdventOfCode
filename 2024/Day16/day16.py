@@ -23,15 +23,6 @@ class Coord:
     def down(self):
         return Coord(self.x + 1, self.y)
 
-@dataclass
-class Move:
-    coord: Coord
-    value: str
-    dir: str
-    score: int
-
-    def __hash__(self):
-        return self.coord.x * 1000 + self.coord.y
 
 def find_pos(map, pos):
     for i, row in enumerate(map):
@@ -39,17 +30,19 @@ def find_pos(map, pos):
             if val == pos:
                 return Coord(i, j)
 
-def get_neighbours(map, pos: Coord, dir: str) -> List[Move]:
+
+def get_neighbours(pos: Coord, dir: str):
     neighbours = []
-    if dir != 'v' and (next_val := map[pos.up.x][pos.up.y]) != '#':
-        neighbours.append(Move(pos.up, next_val, '^', 1 if dir == '^' else 1000))
-    if dir != '^' and (next_val := map[pos.down.x][pos.down.y]) != '#':
-        neighbours.append(Move(pos.down, next_val, 'v', 1 if dir == 'v' else 1000))
-    if dir != '<' and (next_val := map[pos.right.x][pos.right.y]) != '#':
-        neighbours.append(Move(pos.right, next_val, '>', 1 if dir == '>' else 1000))
-    if dir != '>' and (next_val := map[pos.left.x][pos.left.y]) != '#':
-        neighbours.append(Move(pos.left, next_val, '<', 1 if dir == '<' else 1000))
+    if dir != 'v' and map[pos.up.x][pos.up.y] != '#':
+        neighbours.append((pos, pos.up, '^', 1001 if dir != '^' else 1))
+    if dir != '^' and map[pos.down.x][pos.down.y] != '#':
+        neighbours.append((pos, pos.down, 'v', 1001 if dir != 'v' else 1))
+    if dir != '<' and map[pos.right.x][pos.right.y] != '#':
+        neighbours.append((pos, pos.right, '>', 1001 if dir != '>' else 1))
+    if dir != '>' and map[pos.left.x][pos.left.y] != '#':
+        neighbours.append((pos, pos.left, '<', 1001 if dir != '<' else 1))
     return neighbours
+
 
 
 with open('day16.txt', 'r') as f:
@@ -60,19 +53,19 @@ for l in map:
 
 s = find_pos(map, 'S')
 e = find_pos(map, 'E')
-print(s, e)
 
 
-
-def find_shortest(curr: Coord, dir: str, score: int, visited: Set) -> int:
-    neighbours = get_neighbours(map, curr, dir)
-    if not neighbours:
-        return float('inf')
-    for n in neighbours:
-        if n.value == 'E':
-            return score + n.score
-
-    return min([find_shortest(n.coord, n.dir, score + n.score, (visited | set([n])).copy()) for n in neighbours if n not in visited], default=float('inf'))
+print()
+distances = [[(float('inf'), None)for c in row] for row in map]
+distances[s.x][s.y] = (0, '>')
 
 
-print(find_shortest(s, '>', 0, set()))
+ns = get_neighbours(s, '>')
+
+while ns:
+    frm, to, new_dir, score = ns.pop()
+    if distances[frm.x][frm.y][0] + score < distances[to.x][to.y][0]:
+        distances[to.x][to.y] = (distances[frm.x][frm.y][0] + score, new_dir)
+        ns += get_neighbours(to, new_dir)
+
+print(distances[e.x][e.y][0])
