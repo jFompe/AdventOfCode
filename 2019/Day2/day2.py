@@ -4,7 +4,7 @@ from typing import List
 class IntcodeProcessor:
     def __init__(self, memory: List[int]):
         self.ptr = 0
-        self.mem = memory
+        self.mem = memory.copy()
 
     def run(self, arg1: int, arg2: int):
         self.mem[1] = arg1
@@ -31,7 +31,7 @@ class IntcodeProcessor:
 with open('day2.txt', 'r') as f:
     program = [int(op) for op in f.readline().split(',')]
 
-pc = IntcodeProcessor(program.copy())
+pc = IntcodeProcessor(program)
 print(pc.run(12, 2))
 
 
@@ -39,7 +39,7 @@ print(pc.run(12, 2))
 
 for noun in range(100):
     for verb in range(100):
-        pc = IntcodeProcessor(program.copy())
+        pc = IntcodeProcessor(program)
         if pc.run(noun, verb) == 19690720:
             print(100 * noun + verb)
             exit()
