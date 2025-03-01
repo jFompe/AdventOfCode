@@ -22,6 +22,20 @@ class IntcodeProcessor:
             elif opcode == 4: # OUTPUT
                 arg1 = self._next()
                 print('OUT:', self._get_param(arg1, m1))
+            elif opcode == 5: # JMP IF TRUE
+                arg1, arg2 = self._next_n(2)
+                if self._get_param(arg1, m1) != 0:
+                    self.ptr = self._get_param(arg2, m2)
+            elif opcode == 6: # JMP IF FALSE
+                arg1, arg2 = self._next_n(2)
+                if self._get_param(arg1, m1) == 0:
+                    self.ptr = self._get_param(arg2, m2)
+            elif opcode == 7: # LT
+                arg1, arg2, arg3 = self._next_n(3)
+                self.mem[arg3] = self._get_param(arg1, m1) < self._get_param(arg2, m2)
+            elif opcode == 8: # EQ
+                arg1, arg2, arg3 = self._next_n(3)
+                self.mem[arg3] = self._get_param(arg1, m1) == self._get_param(arg2, m2)
             elif opcode == 99: # HALT
                 return self.mem[0]
             else:
