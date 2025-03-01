@@ -11,21 +11,26 @@ class IntcodeProcessor:
         self.mem[2] = arg2
         while True:
             opcode = self._next()
-            arg1, arg2, arg3 = self._next(), self._next(), self._next()
 
             if opcode == 1: # ADD
+                arg1, arg2, arg3 = self._next_n(3)
                 self.mem[arg3] = self.mem[arg1] + self.mem[arg2]
             elif opcode == 2: # MUL
+                arg1, arg2, arg3 = self._next_n(3)
                 self.mem[arg3] = self.mem[arg1] * self.mem[arg2]
             elif opcode == 99: # HALT
                 return self.mem[0]
             else:
                 return -1
 
-    def _next(self):
+    def _next(self) -> int:
         val = self.mem[self.ptr]
         self.ptr += 1
         return val
+
+    def _next_n(self, n) -> tuple:
+        return tuple(self._next() for _ in range(n))
+
 
 
 with open('day2.txt', 'r') as f:
